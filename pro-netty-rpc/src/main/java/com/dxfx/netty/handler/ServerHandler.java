@@ -2,6 +2,7 @@ package com.dxfx.netty.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dxfx.netty.handler.param.ServerRequest;
+import com.dxfx.netty.medium.Mediu;
 import com.dxfx.netty.util.MyResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,24 +12,18 @@ import io.netty.handler.timeout.IdleStateEvent;
 /**
  * @author zzj
  * @version 1.0
- * @date 2021/1/11 21:43
+ * @date 2021/1/18 21:30
  * @description
  */
-public class SimpleServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerHandler extends ChannelInboundHandlerAdapter {
 
-    /**
-     * 服务端处理客户端到来请求的逻辑
-     *
-     * @param ctx
-     * @param msg
-     */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        //ctx.channel().writeAndFlush("接收到客户端到来的请求\r\n");
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        //解析请求
         ServerRequest request = JSONObject.parseObject(msg.toString(), ServerRequest.class);
-        MyResponse response = new MyResponse();
-        response.setId(request.getId());
-        response.setResult("is ok...");
+        //将请求交给中介者集中处理 这里不存在线程安全问题
+        Mediu mediu = Mediu.newInstance();
+        MyResponse response = mediu.process(request);
         ctx.channel().writeAndFlush(JSONObject.toJSONString(response) + "\r\n");
     }
 
@@ -59,4 +54,5 @@ public class SimpleServerHandler extends ChannelInboundHandlerAdapter {
             }
         }
     }
+
 }

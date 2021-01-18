@@ -1,8 +1,6 @@
-package com.dxfx.netty.server;
+package com.dxfx.netty.init;
 
-import com.dxfx.netty.constant.Constants;
-import com.dxfx.netty.factory.ZookeeperFactory;
-import com.dxfx.netty.handler.SimpleServerHandler;
+import com.dxfx.netty.handler.ServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -16,21 +14,23 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.zookeeper.CreateMode;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author zzj
  * @version 1.0
- * @date 2021/1/11 21:14
+ * @date 2021/1/18 20:00
  * @description
  */
-public class NettyServer {
+@Component
 
-    public static void main(String[] args) {
+public class NettyInital implements ApplicationListener<ContextRefreshedEvent> {
+
+    public void start() {
         EventLoopGroup parentGroup = new NioEventLoopGroup();
         EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
@@ -51,7 +51,7 @@ public class NettyServer {
                             ch.pipeline().addLast(new StringDecoder());
                             //设置心跳参数
                             ch.pipeline().addLast(new IdleStateHandler(60, 45, 20, TimeUnit.SECONDS));
-                            ch.pipeline().addLast(new SimpleServerHandler());
+                            ch.pipeline().addLast(new ServerHandler());
                             ch.pipeline().addLast(new StringEncoder());
                         }
                     });
@@ -73,4 +73,13 @@ public class NettyServer {
         }
     }
 
+    /**
+     * 监听Spring容器创建完成（refresh）后的事件，此时启动服务器
+     *
+     * @param event
+     */
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        this.start();
+    }
 }

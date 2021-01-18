@@ -19,7 +19,7 @@ import io.netty.util.AttributeKey;
  * @author zzj
  * @version 1.0
  * @date 2021/1/11 22:28
- * @description
+ * @description --------------短连接客户端-------------
  */
 public class NettyClient {
 
@@ -44,6 +44,8 @@ public class NettyClient {
             //开启客户端 这里同步阻塞 等待客户端连接成功
             ChannelFuture f=b.connect(host,port).sync();
             f.channel().writeAndFlush("hello server"+"\r\n");
+            //-------------短连接 异步获取响应-------------//
+            //短连接：客户端接收到服务端的response 处理后就断开连接了
             //等待客户端另一个线程执行完服务端发送回的数据的逻辑 并且调用channel.close()之后 当前阻塞线程被唤醒
             f.channel().closeFuture().sync();
             Object res=f.channel().attr(AttributeKey.valueOf("msg")).get();

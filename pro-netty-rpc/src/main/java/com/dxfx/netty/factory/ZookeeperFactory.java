@@ -17,7 +17,7 @@ public class ZookeeperFactory {
 
     public static String local = "localhost";
 
-    public static String promote = "192.168.248.128";
+    public static String promote = "192.168.49.128";
 
     public static String port = "2181";
 
